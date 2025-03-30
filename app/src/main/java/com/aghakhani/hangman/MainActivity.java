@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
             Button button = new Button(this);
             button.setText(String.valueOf(c));
             button.setTextSize(16);
-            button.setPadding(8, 8, 8, 8);
+            button.setPadding(8, 8, 8, 8); // Fixed: Correct padding values (left, top, right, bottom)
 
             // Set click listener for each button
             final char guess = c;
