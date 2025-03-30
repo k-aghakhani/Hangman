@@ -3,7 +3,7 @@ package com.aghakhani.hangman;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -11,8 +11,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView wordTextView;
     private TextView attemptsTextView;
-    private EditText guessEditText;
-    private Button guessButton;
+    private GridLayout alphabetGrid;
 
     private String[] words = {"JAVA", "ANDROID", "STUDIO", "CODE", "GAME"}; // List of possible words
     private String wordToGuess; // The word to guess
@@ -27,19 +26,36 @@ public class MainActivity extends AppCompatActivity {
         // Initialize UI components
         wordTextView = findViewById(R.id.wordTextView);
         attemptsTextView = findViewById(R.id.attemptsTextView);
-        guessEditText = findViewById(R.id.guessEditText);
-        guessButton = findViewById(R.id.guessButton);
+        alphabetGrid = findViewById(R.id.alphabetGrid);
+
+        // Create alphabet buttons
+        createAlphabetButtons();
 
         // Start a new game
         startNewGame();
+    }
 
-        // Set button click listener
-        guessButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkGuess();
-            }
-        });
+    // Method to create buttons for each letter of the alphabet
+    private void createAlphabetButtons() {
+        for (char c = 'A'; c <= 'Z'; c++) {
+            Button button = new Button(this);
+            button.setText(String.valueOf(c));
+            button.setTextSize(16);
+            button.setPadding(8, 8, 8, 8);
+
+            // Set click listener for each button
+            final char guess = c;
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkGuess(guess);
+                    button.setEnabled(false); // Disable button after clicking
+                }
+            });
+
+            // Add button to GridLayout
+            alphabetGrid.addView(button);
+        }
     }
 
     // Method to start a new game
@@ -76,27 +92,18 @@ public class MainActivity extends AppCompatActivity {
         // Check win condition
         if (String.valueOf(wordDisplay).equals(wordToGuess)) {
             wordTextView.setText("You Win! The word was: " + wordToGuess);
-            guessButton.setEnabled(false);
+            disableAllButtons();
         }
 
         // Check lose condition
         if (attemptsLeft <= 0) {
             wordTextView.setText("Game Over! The word was: " + wordToGuess);
-            guessButton.setEnabled(false);
+            disableAllButtons();
         }
     }
 
     // Method to check the user's guess
-    private void checkGuess() {
-        // Get the guessed letter
-        String input = guessEditText.getText().toString().toUpperCase();
-        if (input.isEmpty() || input.length() > 1) {
-            return; // Ignore invalid input
-        }
-
-        char guess = input.charAt(0);
-        guessEditText.setText(""); // Clear input field
-
+    private void checkGuess(char guess) {
         // Check if the letter is in the word
         boolean correctGuess = false;
         for (int i = 0; i < wordToGuess.length(); i++) {
@@ -113,5 +120,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Update the display
         updateDisplay();
+    }
+
+    // Method to disable all alphabet buttons
+    private void disableAllButtons() {
+        for (int i = 0; i < alphabetGrid.getChildCount(); i++) {
+            alphabetGrid.getChildAt(i).setEnabled(false);
+        }
     }
 }
