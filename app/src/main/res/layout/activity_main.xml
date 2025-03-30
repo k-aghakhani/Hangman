@@ -23,22 +23,16 @@
         android:textSize="20sp"
         android:layout_marginTop="20dp" />
 
-    <!-- Input for guessing a letter -->
-    <EditText
-        android:id="@+id/guessEditText"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:maxLength="1"
-        android:hint="Enter a letter"
-        android:inputType="text"
-        android:layout_marginTop="20dp" />
-
-    <!-- Button to submit the guess -->
-    <Button
-        android:id="@+id/guessButton"
+    <!-- GridLayout for alphabet buttons -->
+    <GridLayout
+        android:id="@+id/alphabetGrid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Guess"
-        android:layout_marginTop="20dp" />
+        android:columnCount="6"
+        android:rowCount="5"
+        android:layout_marginTop="20dp">
+
+        <!-- Buttons will be added programmatically in Java -->
+    </GridLayout>
 
 </LinearLayout>
