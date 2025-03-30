@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
-import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,11 +37,12 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to create buttons for each letter of the alphabet
     private void createAlphabetButtons() {
+        int index = 0;
         for (char c = 'A'; c <= 'Z'; c++) {
             Button button = new Button(this);
             button.setText(String.valueOf(c));
             button.setTextSize(16);
-            button.setPadding(8, 8, 8, 8); // Fixed: Correct padding values (left, top, right, bottom)
+            button.setPadding(8, 8, 8, 8);
 
             // Set click listener for each button
             final char guess = c;
@@ -53,8 +54,33 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+            // Create layout params for the button
+            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+            params.width = GridLayout.LayoutParams.WRAP_CONTENT;
+            params.height = GridLayout.LayoutParams.WRAP_CONTENT;
+
+            // For Y and Z, place them in the middle of the last row
+            if (c == 'Y') {
+                params.rowSpec = GridLayout.spec(6); // Last row (row 6, zero-based)
+                params.columnSpec = GridLayout.spec(1); // Second column (zero-based)
+            } else if (c == 'Z') {
+                params.rowSpec = GridLayout.spec(6); // Last row (row 6, zero-based)
+                params.columnSpec = GridLayout.spec(2); // Third column (zero-based)
+            } else {
+                // For other letters, place them normally
+                params.rowSpec = GridLayout.spec(index / 4); // Row based on index
+                params.columnSpec = GridLayout.spec(index % 4); // Column based on index
+            }
+
+            button.setLayoutParams(params);
+
             // Add button to GridLayout
             alphabetGrid.addView(button);
+
+            // Increment index for the next button (except for Y and Z, which are manually placed)
+            if (c != 'Y' && c != 'Z') {
+                index++;
+            }
         }
     }
 
