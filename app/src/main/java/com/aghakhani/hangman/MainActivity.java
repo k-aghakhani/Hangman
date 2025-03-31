@@ -4,8 +4,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
-import androidx.appcompat.app.AppCompatActivity;
 import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import android.content.DialogInterface;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -117,15 +119,30 @@ public class MainActivity extends AppCompatActivity {
 
         // Check win condition
         if (String.valueOf(wordDisplay).equals(wordToGuess)) {
-            wordTextView.setText("You Win! The word was: " + wordToGuess);
+            showResultDialog("You Win! The word was: " + wordToGuess);
             disableAllButtons();
         }
 
         // Check lose condition
         if (attemptsLeft <= 0) {
-            wordTextView.setText("Game Over! The word was: " + wordToGuess);
+            showResultDialog("Game Over! The word was: " + wordToGuess);
             disableAllButtons();
         }
+    }
+
+    // Method to show the result in a dialog
+    private void showResultDialog(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message)
+                .setTitle("Game Result")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss(); // Close the dialog
+                    }
+                })
+                .setCancelable(false); // Prevent closing the dialog by pressing back
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     // Method to check the user's guess
