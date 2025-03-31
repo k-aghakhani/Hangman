@@ -101,6 +101,11 @@ public class MainActivity extends AppCompatActivity {
         // Reset attempts
         attemptsLeft = 6;
 
+        // Re-enable all buttons
+        for (int i = 0; i < alphabetGrid.getChildCount(); i++) {
+            alphabetGrid.getChildAt(i).setEnabled(true);
+        }
+
         // Update UI
         updateDisplay();
     }
@@ -130,14 +135,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Method to show the result in a dialog
+    // Method to show the result in a dialog with Restart and Exit options
     private void showResultDialog(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message)
                 .setTitle("Game Result")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Restart", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+                        startNewGame(); // Restart the game
                         dialog.dismiss(); // Close the dialog
+                    }
+                })
+                .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        finish(); // Close the app
                     }
                 })
                 .setCancelable(false); // Prevent closing the dialog by pressing back
