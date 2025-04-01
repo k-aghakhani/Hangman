@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
 import android.content.DialogInterface;
+import android.media.MediaPlayer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,6 +21,9 @@ public class MainActivity extends AppCompatActivity {
     private char[] wordDisplay; // Array to display word with dashes
     private int attemptsLeft = 6; // Number of attempts allowed
 
+    private MediaPlayer winSound; // MediaPlayer for win sound
+    private MediaPlayer loseSound; // MediaPlayer for lose sound
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,6 +33,10 @@ public class MainActivity extends AppCompatActivity {
         wordTextView = findViewById(R.id.wordTextView);
         attemptsTextView = findViewById(R.id.attemptsTextView);
         alphabetGrid = findViewById(R.id.alphabetGrid);
+
+        // Initialize MediaPlayers for sounds
+        winSound = MediaPlayer.create(this, R.raw.win_sound);
+        loseSound = MediaPlayer.create(this, R.raw.lose_sound);
 
         // Create alphabet buttons
         createAlphabetButtons();
@@ -124,12 +132,20 @@ public class MainActivity extends AppCompatActivity {
 
         // Check win condition
         if (String.valueOf(wordDisplay).equals(wordToGuess)) {
+            // Play win sound
+            if (winSound != null) {
+                winSound.start();
+            }
             showResultDialog("You Win! The word was: " + wordToGuess);
             disableAllButtons();
         }
 
         // Check lose condition
         if (attemptsLeft <= 0) {
+            // Play lose sound
+            if (loseSound != null) {
+                loseSound.start();
+            }
             showResultDialog("Game Over! The word was: " + wordToGuess);
             disableAllButtons();
         }
@@ -180,6 +196,20 @@ public class MainActivity extends AppCompatActivity {
     private void disableAllButtons() {
         for (int i = 0; i < alphabetGrid.getChildCount(); i++) {
             alphabetGrid.getChildAt(i).setEnabled(false);
+        }
+    }
+
+    // Release MediaPlayer resources when the activity is destroyed
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (winSound != null) {
+            winSound.release();
+            winSound = null;
+        }
+        if (loseSound != null) {
+            loseSound.release();
+            loseSound = null;
         }
     }
 }
