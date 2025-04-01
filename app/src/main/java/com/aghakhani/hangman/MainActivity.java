@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to check the user's guess
     private void checkGuess(char guess) {
-        // Check if the letter is in the word
+         // Check if the letter is in the word
         boolean correctGuess = false;
         for (int i = 0; i < wordToGuess.length(); i++) {
             if (wordToGuess.charAt(i) == guess) {
