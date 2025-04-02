@@ -137,9 +137,9 @@ public class MainActivity extends AppCompatActivity {
             if (winSound != null) {
                 winSound.start();
             }
-            // Move to the next level
-            currentLevel++;
-            startNewGame(); // Start the next level
+            // Show win dialog
+            showWinDialog("Congratulations! You guessed the word: " + wordToGuess);
+            disableAllButtons();
         }
 
         // Check lose condition
@@ -148,13 +148,35 @@ public class MainActivity extends AppCompatActivity {
             if (loseSound != null) {
                 loseSound.start();
             }
-            showResultDialog("Game Over! The word was: " + wordToGuess + "\nYou reached Level: " + currentLevel);
+            showLoseDialog("Game Over! The word was: " + wordToGuess + "\nYou reached Level: " + currentLevel);
             disableAllButtons();
         }
     }
 
-    // Method to show the result in a dialog with Restart and Exit options
-    private void showResultDialog(String message) {
+    // Method to show the win dialog with Continue and Exit options
+    private void showWinDialog(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message)
+                .setTitle("You Win!")
+                .setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        currentLevel++; // Move to the next level
+                        startNewGame(); // Start the next level
+                        dialog.dismiss(); // Close the dialog
+                    }
+                })
+                .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        finish(); // Close the app
+                    }
+                })
+                .setCancelable(false); // Prevent closing the dialog by pressing back
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    // Method to show the lose dialog with Restart and Exit options
+    private void showLoseDialog(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message)
                 .setTitle("Game Result")
