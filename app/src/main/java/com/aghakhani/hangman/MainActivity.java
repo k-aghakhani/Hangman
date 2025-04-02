@@ -9,6 +9,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
 import android.content.DialogInterface;
 import android.media.MediaPlayer;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -128,8 +132,19 @@ public class MainActivity extends AppCompatActivity {
         }
         wordTextView.setText(display.toString());
 
-        // Update attempts left and show the current level
-        attemptsTextView.setText("Level: " + currentLevel + " | Attempts left: " + attemptsLeft);
+        // Create the text for attemptsTextView with different colors for "Level" part
+        String levelText = "Level: " + currentLevel;
+        String attemptsText = " | Attempts left: " + attemptsLeft;
+        String fullText = levelText + attemptsText;
+
+        SpannableString spannableString = new SpannableString(fullText);
+        // Set color for "Level: X" part (e.g., blue)
+        spannableString.setSpan(
+                new ForegroundColorSpan(ContextCompat.getColor(this, android.R.color.holo_blue_dark)),
+                0, levelText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
+        // The rest of the text (" | Attempts left: Y") will use the default color
+        attemptsTextView.setText(spannableString);
 
         // Check win condition
         if (String.valueOf(wordDisplay).equals(wordToGuess)) {
