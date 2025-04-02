@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private String wordToGuess; // The word to guess
     private char[] wordDisplay; // Array to display word with dashes
     private int attemptsLeft = 6; // Number of attempts allowed
+    private int currentLevel = 1; // Track the current level
 
     private MediaPlayer winSound; // MediaPlayer for win sound
     private MediaPlayer loseSound; // MediaPlayer for lose sound
@@ -94,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Method to start a new game
+    // Method to start a new game or move to the next level
     private void startNewGame() {
         // Select a random word from the list
         int randomIndex = (int) (Math.random() * words.length);
@@ -127,8 +128,8 @@ public class MainActivity extends AppCompatActivity {
         }
         wordTextView.setText(display.toString());
 
-        // Update attempts left
-        attemptsTextView.setText("Attempts left: " + attemptsLeft);
+        // Update attempts left and show the current level
+        attemptsTextView.setText("Level: " + currentLevel + " | Attempts left: " + attemptsLeft);
 
         // Check win condition
         if (String.valueOf(wordDisplay).equals(wordToGuess)) {
@@ -136,8 +137,9 @@ public class MainActivity extends AppCompatActivity {
             if (winSound != null) {
                 winSound.start();
             }
-            showResultDialog("You Win! The word was: " + wordToGuess);
-            disableAllButtons();
+            // Move to the next level
+            currentLevel++;
+            startNewGame(); // Start the next level
         }
 
         // Check lose condition
@@ -146,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
             if (loseSound != null) {
                 loseSound.start();
             }
-            showResultDialog("Game Over! The word was: " + wordToGuess);
+            showResultDialog("Game Over! The word was: " + wordToGuess + "\nYou reached Level: " + currentLevel);
             disableAllButtons();
         }
     }
@@ -158,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle("Game Result")
                 .setPositiveButton("Restart", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+                        currentLevel = 1; // Reset level to 1
                         startNewGame(); // Restart the game
                         dialog.dismiss(); // Close the dialog
                     }
@@ -174,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to check the user's guess
     private void checkGuess(char guess) {
-         // Check if the letter is in the word
+        // Check if the letter is in the word
         boolean correctGuess = false;
         for (int i = 0; i < wordToGuess.length(); i++) {
             if (wordToGuess.charAt(i) == guess) {
