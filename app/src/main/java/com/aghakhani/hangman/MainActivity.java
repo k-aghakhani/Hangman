@@ -13,6 +13,9 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import androidx.core.content.ContextCompat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
     private GridLayout alphabetGrid;
 
     private String[] words = {"JAVA", "ANDROID", "STUDIO", "CODE", "GAME"}; // List of possible words
+    private ArrayList<String> availableWords; // List of words that haven't been used yet
+    private ArrayList<String> usedWords; // List of words that have been used
     private String wordToGuess; // The word to guess
     private char[] wordDisplay; // Array to display word with dashes
     private int attemptsLeft = 6; // Number of attempts allowed
@@ -38,6 +43,10 @@ public class MainActivity extends AppCompatActivity {
         wordTextView = findViewById(R.id.wordTextView);
         attemptsTextView = findViewById(R.id.attemptsTextView);
         alphabetGrid = findViewById(R.id.alphabetGrid);
+
+        // Initialize the lists for available and used words
+        availableWords = new ArrayList<>(Arrays.asList(words));
+        usedWords = new ArrayList<>();
 
         // Initialize MediaPlayers for sounds
         winSound = MediaPlayer.create(this, R.raw.win_sound);
@@ -101,9 +110,21 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to start a new game or move to the next level
     private void startNewGame() {
-        // Select a random word from the list
-        int randomIndex = (int) (Math.random() * words.length);
-        wordToGuess = words[randomIndex];
+        // Check if there are any words left to guess
+        if (availableWords.isEmpty()) {
+            // If no words are left, show a dialog to end the game
+            showGameCompletedDialog("Congratulations! You've completed all levels!\nYou reached Level: " + currentLevel);
+            return;
+        }
+
+        // Select a random word from the available words
+        Random random = new Random();
+        int randomIndex = random.nextInt(availableWords.size());
+        wordToGuess = availableWords.get(randomIndex);
+
+        // Move the selected word from available to used
+        usedWords.add(wordToGuess);
+        availableWords.remove(wordToGuess);
 
         // Initialize the display array with dashes
         wordDisplay = new char[wordToGuess.length()];
@@ -198,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("Restart", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         currentLevel = 1; // Reset level to 1
+                        resetWordLists(); // Reset the word lists
                         startNewGame(); // Restart the game
                         dialog.dismiss(); // Close the dialog
                     }
@@ -210,6 +232,36 @@ public class MainActivity extends AppCompatActivity {
                 .setCancelable(false); // Prevent closing the dialog by pressing back
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    // Method to show a dialog when all words are guessed
+    private void showGameCompletedDialog(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message)
+                .setTitle("Game Completed!")
+                .setPositiveButton("Restart", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        currentLevel = 1; // Reset level to 1
+                        resetWordLists(); // Reset the word lists
+                        startNewGame(); // Restart the game
+                        dialog.dismiss(); // Close the dialog
+                    }
+                })
+                .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        finish(); // Close the app
+                    }
+                })
+                .setCancelable(false); // Prevent closing the dialog by pressing back
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    // Method to reset the word lists
+    private void resetWordLists() {
+        availableWords.clear();
+        usedWords.clear();
+        availableWords.addAll(Arrays.asList(words));
     }
 
     // Method to check the user's guess
