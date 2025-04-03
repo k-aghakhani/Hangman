@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView attemptsTextView;
     private GridLayout alphabetGrid;
 
-    private String[] words = {"JAVA", "ANDROID", "STUDIO", "CODE", "GAME"}; // List of possible words
+    private String[] words = {"JAVA", "ANDROID", "STUDIO", "CODE", "GAME","DOG","APPLE"}; // List of possible words
     private ArrayList<String> availableWords; // List of words that haven't been used yet
     private ArrayList<String> usedWords; // List of words that have been used
     private String wordToGuess; // The word to guess
