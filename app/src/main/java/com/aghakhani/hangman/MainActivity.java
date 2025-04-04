@@ -20,7 +20,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
@@ -40,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
     private MediaPlayer loseSound; // MediaPlayer for lose sound
 
     private RequestQueue requestQueue; // Volley RequestQueue for API calls
+
+    // Default words in case API fails
+    private final String[] defaultWords = {"JAVA", "ANDROID", "STUDIO", "CODE", "GAME", "DOG", "APPLE"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to fetch words from the API
     private void fetchWordsFromApi() {
-        String url = "https://random-word-api.herokuapp.com/word?number=10"; // Fetch 10 words at once
+        // Use Datamuse API to fetch random words
+        String url = "https://random-word-api.vercel.app/api?words=10";
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET,
@@ -86,24 +92,27 @@ public class MainActivity extends AppCompatActivity {
 
                             // Parse the JSON array and add words to availableWords
                             for (int i = 0; i < response.length(); i++) {
-                                String word = response.getString(i).toUpperCase();
+                                JSONObject wordObject = response.getJSONObject(i);
+                                String word = wordObject.getString("word").toUpperCase();
                                 // Only add words that contain only letters (no special characters or numbers)
                                 if (word.matches("[A-Z]+")) {
                                     availableWords.add(word);
                                 }
                             }
 
-                            // If no valid words were fetched, show an error dialog
+                            // If no valid words were fetched, use default words
                             if (availableWords.isEmpty()) {
-                                showErrorDialog("No valid words received from the API. Please try again.");
-                                return;
+                                availableWords.addAll(Arrays.asList(defaultWords));
                             }
 
                             // Start a new game with the fetched words
                             startNewGame();
                         } catch (Exception e) {
                             e.printStackTrace();
-                            showErrorDialog("Error parsing words from the API.");
+                            // Use default words if parsing fails
+                            availableWords.clear();
+                            availableWords.addAll(Arrays.asList(defaultWords));
+                            startNewGame();
                         }
                     }
                 },
@@ -111,34 +120,16 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
-                        showErrorDialog("Failed to fetch words from the API. Please check your internet connection and try again.");
+                        // Use default words if API fails
+                        availableWords.clear();
+                        availableWords.addAll(Arrays.asList(defaultWords));
+                        startNewGame();
                     }
                 }
         );
 
         // Add the request to the RequestQueue
         requestQueue.add(jsonArrayRequest);
-    }
-
-    // Method to show an error dialog
-    private void showErrorDialog(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(message)
-                .setTitle("Error")
-                .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        fetchWordsFromApi(); // Retry fetching words
-                        dialog.dismiss();
-                    }
-                })
-                .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        finish(); // Close the app
-                    }
-                })
-                .setCancelable(false);
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
 
     // Method to create buttons for each letter of the alphabet
@@ -345,6 +336,27 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .setCancelable(false); // Prevent closing the dialog by pressing back
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    // Method to show an error dialog
+    private void showErrorDialog(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message)
+                .setTitle("Error")
+                .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        fetchWordsFromApi(); // Retry fetching words
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        finish(); // Close the app
+                    }
+                })
+                .setCancelable(false);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
