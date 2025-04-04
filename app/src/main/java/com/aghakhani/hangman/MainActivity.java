@@ -20,7 +20,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -76,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to fetch words from the API
     private void fetchWordsFromApi() {
-        // Use Datamuse API to fetch random words
+        // Use Random Word API (Vercel) to fetch random words
         String url = "https://random-word-api.vercel.app/api?words=10";
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
@@ -92,8 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
                             // Parse the JSON array and add words to availableWords
                             for (int i = 0; i < response.length(); i++) {
-                                JSONObject wordObject = response.getJSONObject(i);
-                                String word = wordObject.getString("word").toUpperCase();
+                                String word = response.getString(i).toUpperCase();
                                 // Only add words that contain only letters (no special characters or numbers)
                                 if (word.matches("[A-Z]+")) {
                                     availableWords.add(word);
