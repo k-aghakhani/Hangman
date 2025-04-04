@@ -13,8 +13,14 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import androidx.core.content.ContextCompat;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
+import org.json.JSONArray;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView attemptsTextView;
     private GridLayout alphabetGrid;
 
-    private String[] words = {"JAVA", "ANDROID", "STUDIO", "CODE", "GAME","DOG","APPLE"}; // List of possible words
     private ArrayList<String> availableWords; // List of words that haven't been used yet
     private ArrayList<String> usedWords; // List of words that have been used
     private String wordToGuess; // The word to guess
@@ -33,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
 
     private MediaPlayer winSound; // MediaPlayer for win sound
     private MediaPlayer loseSound; // MediaPlayer for lose sound
+
+    private RequestQueue requestQueue; // Volley RequestQueue for API calls
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,18 +52,93 @@ public class MainActivity extends AppCompatActivity {
         alphabetGrid = findViewById(R.id.alphabetGrid);
 
         // Initialize the lists for available and used words
-        availableWords = new ArrayList<>(Arrays.asList(words));
+        availableWords = new ArrayList<>();
         usedWords = new ArrayList<>();
 
         // Initialize MediaPlayers for sounds
         winSound = MediaPlayer.create(this, R.raw.win_sound);
         loseSound = MediaPlayer.create(this, R.raw.lose_sound);
 
+        // Initialize Volley RequestQueue
+        requestQueue = Volley.newRequestQueue(this);
+
         // Create alphabet buttons
         createAlphabetButtons();
 
-        // Start a new game
-        startNewGame();
+        // Fetch words from API and start a new game
+        fetchWordsFromApi();
+    }
+
+    // Method to fetch words from the API
+    private void fetchWordsFromApi() {
+        String url = "https://random-word-api.herokuapp.com/word?number=10"; // Fetch 10 words at once
+
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
+                Request.Method.GET,
+                url,
+                null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            // Clear the availableWords list to avoid duplicates
+                            availableWords.clear();
+
+                            // Parse the JSON array and add words to availableWords
+                            for (int i = 0; i < response.length(); i++) {
+                                String word = response.getString(i).toUpperCase();
+                                // Only add words that contain only letters (no special characters or numbers)
+                                if (word.matches("[A-Z]+")) {
+                                    availableWords.add(word);
+                                }
+                            }
+
+                            // If no valid words were fetched, show an error dialog
+                            if (availableWords.isEmpty()) {
+                                showErrorDialog("Failed to fetch words from the API. Please check your internet connection and try again.");
+                                return;
+                            }
+
+                            // Start a new game with the fetched words
+                            startNewGame();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            showErrorDialog("Error parsing words from the API.");
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        showErrorDialog("Failed to fetch words from the API. Please check your internet connection and try again.");
+                    }
+                }
+        );
+
+        // Add the request to the RequestQueue
+        requestQueue.add(jsonArrayRequest);
+    }
+
+    // Method to show an error dialog
+    private void showErrorDialog(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message)
+                .setTitle("Error")
+                .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        fetchWordsFromApi(); // Retry fetching words
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        finish(); // Close the app
+                    }
+                })
+                .setCancelable(false);
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     // Method to create buttons for each letter of the alphabet
@@ -220,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int id) {
                         currentLevel = 1; // Reset level to 1
                         resetWordLists(); // Reset the word lists
-                        startNewGame(); // Restart the game
+                        fetchWordsFromApi(); // Fetch new words and restart the game
                         dialog.dismiss(); // Close the dialog
                     }
                 })
@@ -243,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int id) {
                         currentLevel = 1; // Reset level to 1
                         resetWordLists(); // Reset the word lists
-                        startNewGame(); // Restart the game
+                        fetchWordsFromApi(); // Fetch new words and restart the game
                         dialog.dismiss(); // Close the dialog
                     }
                 })
@@ -261,7 +343,6 @@ public class MainActivity extends AppCompatActivity {
     private void resetWordLists() {
         availableWords.clear();
         usedWords.clear();
-        availableWords.addAll(Arrays.asList(words));
     }
 
     // Method to check the user's guess
