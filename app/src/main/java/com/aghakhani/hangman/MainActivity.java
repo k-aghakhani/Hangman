@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
                             // If no valid words were fetched, show an error dialog
                             if (availableWords.isEmpty()) {
-                                showErrorDialog("Failed to fetch words from the API. Please check your internet connection and try again.");
+                                showErrorDialog("No valid words received from the API. Please try again.");
                                 return;
                             }
 
@@ -209,9 +209,14 @@ public class MainActivity extends AppCompatActivity {
         availableWords.remove(wordToGuess);
 
         // Initialize the display array with dashes
-        wordDisplay = new char[wordToGuess.length()];
-        for (int i = 0; i < wordToGuess.length(); i++) {
-            wordDisplay[i] = '_';
+        if (wordToGuess != null) {
+            wordDisplay = new char[wordToGuess.length()];
+            for (int i = 0; i < wordToGuess.length(); i++) {
+                wordDisplay[i] = '_';
+            }
+        } else {
+            showErrorDialog("Failed to select a word. Please try again.");
+            return;
         }
 
         // Reset attempts
@@ -228,6 +233,11 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to update the UI
     private void updateDisplay() {
+        // Check if wordDisplay is initialized
+        if (wordDisplay == null) {
+            return;
+        }
+
         // Convert char array to string with spaces for readability
         StringBuilder display = new StringBuilder();
         for (char c : wordDisplay) {
@@ -250,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
         attemptsTextView.setText(spannableString);
 
         // Check win condition
-        if (String.valueOf(wordDisplay).equals(wordToGuess)) {
+        if (wordToGuess != null && String.valueOf(wordDisplay).equals(wordToGuess)) {
             // Play win sound
             if (winSound != null) {
                 winSound.start();
@@ -347,6 +357,12 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to check the user's guess
     private void checkGuess(char guess) {
+        // Check if wordToGuess is null
+        if (wordToGuess == null) {
+            showErrorDialog("No word to guess. Please try again.");
+            return;
+        }
+
         // Check if the letter is in the word
         boolean correctGuess = false;
         for (int i = 0; i < wordToGuess.length(); i++) {
