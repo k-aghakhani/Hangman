@@ -3,37 +3,40 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center">
+    android:background="@drawable/background_gradient"
+    android:padding="16dp">
 
-    <!-- Display the word with dashes -->
+    <!-- Word to guess -->
     <TextView
-        android:gravity="center"
         android:id="@+id/wordTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:textSize="30sp"
-        android:text="_____" />
+        android:textColor="@android:color/white"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="sans-serif-medium" />
 
-    <!-- Display remaining attempts -->
+    <!-- Level and attempts -->
     <TextView
         android:id="@+id/attemptsTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Attempts left: 6"
-        android:textSize="20sp"
-        android:layout_marginTop="20dp" />
+        android:layout_gravity="center"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="sans-serif-medium" />
 
-    <!-- GridLayout for alphabet buttons -->
+    <!-- Alphabet grid -->
     <GridLayout
         android:id="@+id/alphabetGrid"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:columnCount="4"
         android:rowCount="7"
-        android:layout_marginTop="20dp">
-
-        <!-- Buttons will be added programmatically in Java -->
-    </GridLayout>
+        android:alignmentMode="alignMargins"
+        android:layout_gravity="center" />
 
 </LinearLayout>
