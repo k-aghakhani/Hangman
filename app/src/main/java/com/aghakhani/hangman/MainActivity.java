@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> usedWords; // List of words that have been used
     private String wordToGuess; // The word to guess
     private char[] wordDisplay; // Array to display word with dashes
-    private int attemptsLeft = 6; // Number of attempts allowed
+    private int attemptsLeft = 7; // Number of attempts allowed
     private int currentLevel = 1; // Track the current level
 
     private MediaPlayer winSound; // MediaPlayer for win sound
@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        attemptsLeft = 6;
+        attemptsLeft = 7;
 
         for (int i = 0; i < alphabetGrid.getChildCount(); i++) {
             alphabetGrid.getChildAt(i).setEnabled(true);
