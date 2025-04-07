@@ -1,5 +1,8 @@
 package com.aghakhani.hangman;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -34,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> usedWords; // List of words that have been used
     private String wordToGuess; // The word to guess
     private char[] wordDisplay; // Array to display word with dashes
-    private int attemptsLeft = 7; // Number of attempts allowed
+    private int attemptsLeft = 10; // Number of attempts allowed
     private int currentLevel = 1; // Track the current level
 
     private MediaPlayer winSound; // MediaPlayer for win sound
@@ -42,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     private RequestQueue requestQueue; // Volley RequestQueue for API calls
 
-    // Default words in case API fails
+    // Default words in case API fails or no internet
     private final String[] defaultWords = {"JAVA", "ANDROID", "STUDIO", "CODE", "GAME", "DOG", "APPLE"};
 
     @Override
@@ -73,8 +76,40 @@ public class MainActivity extends AppCompatActivity {
         fetchWordsFromApi();
     }
 
+    // Method to check if the device is connected to the internet
+    private boolean isInternetConnected() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+            return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        }
+        return false;
+    }
+
     // Method to fetch words from the API
     private void fetchWordsFromApi() {
+        // Check internet connection
+        if (!isInternetConnected()) {
+            // Show dialog to inform user about no internet
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomDialogTheme);
+            builder.setMessage("No internet connection. The game will use default words. Connect to the internet to fetch new words.")
+                    .setTitle("No Internet")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Use default words and start the game
+                            availableWords.clear();
+                            availableWords.addAll(Arrays.asList(defaultWords));
+                            startNewGame();
+                            dialog.dismiss();
+                        }
+                    })
+                    .setCancelable(false);
+            AlertDialog dialog = builder.create();
+            dialog.show();
+            return;
+        }
+
+        // If internet is connected, fetch words from API
         String url = "https://random-word-api.vercel.app/api?words=10";
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
@@ -125,27 +160,24 @@ public class MainActivity extends AppCompatActivity {
             button.setText(String.valueOf(c));
             button.setTextSize(16);
             button.setPadding(16, 16, 16, 16);
-            button.setBackgroundResource(R.drawable.button_background); // Use custom button background
+            button.setBackgroundResource(R.drawable.button_background);
             button.setTextColor(ContextCompat.getColor(this, android.R.color.white));
 
-            // Set click listener for each button
             final char guess = c;
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     checkGuess(guess);
-                    button.setEnabled(false); // Disable button after clicking
-                    button.setBackgroundResource(R.drawable.button_background_disabled); // Change background when disabled
+                    button.setEnabled(false);
+                    button.setBackgroundResource(R.drawable.button_background_disabled);
                 }
             });
 
-            // Create layout params for the button
             GridLayout.LayoutParams params = new GridLayout.LayoutParams();
             params.width = GridLayout.LayoutParams.WRAP_CONTENT;
             params.height = GridLayout.LayoutParams.WRAP_CONTENT;
-            params.setMargins(8, 8, 8, 8); // Add margins for spacing
+            params.setMargins(8, 8, 8, 8);
 
-            // For Y and Z, place them in the middle of the last row
             if (c == 'Y') {
                 params.rowSpec = GridLayout.spec(6);
                 params.columnSpec = GridLayout.spec(1);
@@ -190,11 +222,11 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        attemptsLeft = 7;
+        attemptsLeft = 10;
 
         for (int i = 0; i < alphabetGrid.getChildCount(); i++) {
             alphabetGrid.getChildAt(i).setEnabled(true);
-            alphabetGrid.getChildAt(i).setBackgroundResource(R.drawable.button_background); // Reset button background
+            alphabetGrid.getChildAt(i).setBackgroundResource(R.drawable.button_background);
         }
 
         updateDisplay();
