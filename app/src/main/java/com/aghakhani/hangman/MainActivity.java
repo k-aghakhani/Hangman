@@ -5,6 +5,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
@@ -33,20 +35,19 @@ public class MainActivity extends AppCompatActivity {
     private TextView attemptsTextView;
     private GridLayout alphabetGrid;
 
-    private ArrayList<String> availableWords; // List of words that haven't been used yet
-    private ArrayList<String> usedWords; // List of words that have been used
-    private String wordToGuess; // The word to guess
-    private char[] wordDisplay; // Array to display word with dashes
-    private int attemptsLeft = 10; // Number of attempts allowed
-    private int currentLevel = 1; // Track the current level
+    private ArrayList<String> availableWords;
+    private ArrayList<String> usedWords;
+    private String wordToGuess;
+    private char[] wordDisplay;
+    private int attemptsLeft = 10;
+    private int currentLevel = 1;
 
-    private MediaPlayer winSound; // MediaPlayer for win sound
-    private MediaPlayer loseSound; // MediaPlayer for lose sound
-    private MediaPlayer clickSound; // MediaPlayer for click sound
+    private MediaPlayer winSound;
+    private MediaPlayer loseSound;
+    private MediaPlayer clickSound;
 
-    private RequestQueue requestQueue; // Volley RequestQueue for API calls
+    private RequestQueue requestQueue;
 
-    // Default words in case API fails or no internet
     private final String[] defaultWords = {"JAVA", "ANDROID", "STUDIO", "CODE", "GAME", "DOG", "APPLE"};
 
     @Override
@@ -66,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         // Initialize MediaPlayers for sounds
         winSound = MediaPlayer.create(this, R.raw.win_sound);
         loseSound = MediaPlayer.create(this, R.raw.lose_sound);
-        clickSound = MediaPlayer.create(this, R.raw.click_sound); // Initialize click sound
+        clickSound = MediaPlayer.create(this, R.raw.click_sound);
 
         // Initialize Volley RequestQueue
         requestQueue = Volley.newRequestQueue(this);
@@ -165,6 +166,10 @@ public class MainActivity extends AppCompatActivity {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    // Load and start the button animation
+                    Animation scaleAnimation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.button_scale);
+                    v.startAnimation(scaleAnimation);
+
                     // Play click sound
                     if (clickSound != null) {
                         clickSound.start();
