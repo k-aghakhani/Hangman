@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private MediaPlayer winSound; // MediaPlayer for win sound
     private MediaPlayer loseSound; // MediaPlayer for lose sound
+    private MediaPlayer clickSound; // MediaPlayer for click sound
 
     private RequestQueue requestQueue; // Volley RequestQueue for API calls
 
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         // Initialize MediaPlayers for sounds
         winSound = MediaPlayer.create(this, R.raw.win_sound);
         loseSound = MediaPlayer.create(this, R.raw.lose_sound);
+        clickSound = MediaPlayer.create(this, R.raw.click_sound); // Initialize click sound
 
         // Initialize Volley RequestQueue
         requestQueue = Volley.newRequestQueue(this);
@@ -88,15 +90,12 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to fetch words from the API
     private void fetchWordsFromApi() {
-        // Check internet connection
         if (!isInternetConnected()) {
-            // Show dialog to inform user about no internet
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomDialogTheme);
             builder.setMessage("No internet connection. The game will use default words. Connect to the internet to fetch new words.")
                     .setTitle("No Internet")
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            // Use default words and start the game
                             availableWords.clear();
                             availableWords.addAll(Arrays.asList(defaultWords));
                             startNewGame();
@@ -109,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // If internet is connected, fetch words from API
         String url = "https://random-word-api.vercel.app/api?words=10";
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
@@ -167,6 +165,10 @@ public class MainActivity extends AppCompatActivity {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    // Play click sound
+                    if (clickSound != null) {
+                        clickSound.start();
+                    }
                     checkGuess(guess);
                     button.setEnabled(false);
                     button.setBackgroundResource(R.drawable.button_background_disabled);
@@ -408,6 +410,10 @@ public class MainActivity extends AppCompatActivity {
         if (loseSound != null) {
             loseSound.release();
             loseSound = null;
+        }
+        if (clickSound != null) {
+            clickSound.release();
+            clickSound = null;
         }
     }
 }
