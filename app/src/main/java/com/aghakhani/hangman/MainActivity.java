@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
     private RequestQueue requestQueue;
 
-    private final String[] defaultWords = {"JAVA", "ANDROID", "STUDIO", "CODE", "GAME", "DOG", "APPLE"};
+    private final String[] defaultWords = {"JAVA", "ANDROID", "STUDIO", "CODE", "GAME", "CAT","DOG", "APPLE"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
