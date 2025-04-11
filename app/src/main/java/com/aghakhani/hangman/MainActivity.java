@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -42,12 +43,13 @@ public class MainActivity extends AppCompatActivity {
     private char[] wordDisplay;
     private int attemptsLeft = 10;
     private int currentLevel = 1;
-    private int score = 0; // Current score
-    private int highScore = 0; // High score
+    private int score = 0;
+    private int highScore = 0;
 
     private MediaPlayer winSound;
     private MediaPlayer loseSound;
     private MediaPlayer clickSound;
+    private Vibrator vibrator; // Vibrator for wrong guess feedback
 
     private RequestQueue requestQueue;
 
@@ -72,6 +74,9 @@ public class MainActivity extends AppCompatActivity {
         winSound = MediaPlayer.create(this, R.raw.win_sound);
         loseSound = MediaPlayer.create(this, R.raw.lose_sound);
         clickSound = MediaPlayer.create(this, R.raw.click_sound);
+
+        // Initialize Vibrator
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         // Initialize Volley RequestQueue
         requestQueue = Volley.newRequestQueue(this);
@@ -423,6 +428,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (!correctGuess) {
             attemptsLeft--;
+            // Vibrate on wrong guess
+            if (vibrator != null) {
+                vibrator.vibrate(100); // Vibrate for 100 milliseconds
+            }
         }
 
         updateDisplay();
@@ -436,7 +445,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Release MediaPlayer resources when the activity is destroyed
+    // Release MediaPlayer and Vibrator resources when the activity is destroyed
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -451,6 +460,9 @@ public class MainActivity extends AppCompatActivity {
         if (clickSound != null) {
             clickSound.release();
             clickSound = null;
+        }
+        if (vibrator != null) {
+            vibrator.cancel();
         }
     }
 }
