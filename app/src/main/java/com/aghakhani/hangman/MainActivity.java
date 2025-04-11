@@ -1,6 +1,7 @@
 package com.aghakhani.hangman;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -41,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private char[] wordDisplay;
     private int attemptsLeft = 10;
     private int currentLevel = 1;
+    private int score = 0; // Current score
+    private int highScore = 0; // High score
 
     private MediaPlayer winSound;
     private MediaPlayer loseSound;
@@ -48,7 +51,8 @@ public class MainActivity extends AppCompatActivity {
 
     private RequestQueue requestQueue;
 
-    private final String[] defaultWords = {"JAVA", "ANDROID", "STUDIO", "CODE", "GAME", "CAT","DOG","ELEPHANT","FISH","GAME", "APPLE"};
+    private final String[] defaultWords = {"JAVA", "ANDROID", "STUDIO", "CODE", "GAME", "DOG", "APPLE"};
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +75,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize Volley RequestQueue
         requestQueue = Volley.newRequestQueue(this);
+
+        // Initialize SharedPreferences for storing high score
+        sharedPreferences = getSharedPreferences("HangmanPrefs", MODE_PRIVATE);
+        highScore = sharedPreferences.getInt("highScore", 0);
 
         // Create alphabet buttons
         createAlphabetButtons();
@@ -208,7 +216,9 @@ public class MainActivity extends AppCompatActivity {
     // Method to start a new game or move to the next level
     private void startNewGame() {
         if (availableWords.isEmpty()) {
-            showGameCompletedDialog("Congratulations! You've completed all levels!\nYou reached Level: " + currentLevel);
+            String message = "Congratulations! You've completed all levels!\nYou reached Level: " + currentLevel +
+                    "\nYour Score: " + score + "\nHigh Score: " + highScore;
+            showGameCompletedDialog(message);
             return;
         }
 
@@ -263,10 +273,17 @@ public class MainActivity extends AppCompatActivity {
         attemptsTextView.setText(spannableString);
 
         if (wordToGuess != null && String.valueOf(wordDisplay).equals(wordToGuess)) {
+            // Calculate score for winning
+            score += 10; // Base score for guessing the word
+            score += attemptsLeft * 2; // Bonus score for remaining attempts
+            updateHighScore();
+
             if (winSound != null) {
                 winSound.start();
             }
-            showWinDialog("Congratulations! You guessed the word: " + wordToGuess);
+            String message = "Congratulations! You guessed the word: " + wordToGuess +
+                    "\nYour Score: " + score + "\nHigh Score: " + highScore;
+            showWinDialog(message);
             disableAllButtons();
         }
 
@@ -274,8 +291,21 @@ public class MainActivity extends AppCompatActivity {
             if (loseSound != null) {
                 loseSound.start();
             }
-            showLoseDialog("Game Over! The word was: " + wordToGuess + "\nYou reached Level: " + currentLevel);
+            String message = "Game Over! The word was: " + wordToGuess +
+                    "\nYou reached Level: " + currentLevel +
+                    "\nYour Score: " + score + "\nHigh Score: " + highScore;
+            showLoseDialog(message);
             disableAllButtons();
+        }
+    }
+
+    // Method to update high score
+    private void updateHighScore() {
+        if (score > highScore) {
+            highScore = score;
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("highScore", highScore);
+            editor.apply();
         }
     }
 
@@ -309,6 +339,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("Restart", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         currentLevel = 1;
+                        score = 0; // Reset score
                         resetWordLists();
                         fetchWordsFromApi();
                         dialog.dismiss();
@@ -332,6 +363,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("Restart", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         currentLevel = 1;
+                        score = 0; // Reset score
                         resetWordLists();
                         fetchWordsFromApi();
                         dialog.dismiss();
